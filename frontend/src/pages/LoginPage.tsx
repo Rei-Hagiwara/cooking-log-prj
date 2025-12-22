@@ -13,7 +13,7 @@ export const LoginPage: React.FC = () => {
     // ロード中は何もしない
     if (sessionLoading) {
         return (
- <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-black">
+ <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100 dark:from-stone-800 dark:to-zinc-900">
         {/* 標準の transition と opacity を使い、React のマウント時にふわっとさせる */}
         <div className="flex flex-col items-center space-y-4 transition-opacity duration-700 ease-in-out">
           <div className="relative">
