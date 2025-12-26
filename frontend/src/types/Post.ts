@@ -2,12 +2,13 @@
 export type Post = {
     id: string;
     user_id: string;
-    comment: string | null;
-    rating: number | null;
-    image_url: string | null;
-    deleted_at: string | null
+    comment?: string;
+    rating?: number;
+    image_url?: string;
+    deleted_at?: string
     created_at: string;
-    updated_at: string;
+    updated_at?: string;
+    title?: string;
 };
 
 /**

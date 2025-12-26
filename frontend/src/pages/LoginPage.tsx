@@ -81,26 +81,13 @@ export const LoginPage: React.FC = () => {
 
     // 未ログインの場合は認証UIを表示
     return (
-        <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100 dark:from-stone-400 dark:to-zinc-700">
+        <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100 dark:from-slate-500 dark:to-slate-700">
             <div className="max-w-md w-full mx-4">
                 <div className="bg-white dark:bg-background rounded-2xl  border-6 shadow-xl p-8 space-y-6 animate-slide-up">
                     {/* ロゴ・タイトルエリア */}
                     <div className="text-center space-y-2">
-                        <div className="w-16 h-16 bg-linear-to-br from-blue-500 to-indigo-600 rounded-xl mx-auto flex items-center justify-center">
-                            <svg
-                                className="w-10 h-10 text-white"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M13 10V3L4 14h7v7l9-11h-7z"
-                                />
-                            </svg>
+                        <div className="w-16 h-16 bg-amber-600 rounded-xl mx-auto flex items-center justify-center">
+                            <img src="/svgs/brand_icons/LightMode.svg" alt="Cooking-log Logo" className="w-10 h-10" />
                         </div>
                         <h1 className="text-xl font-bold text-gray-900">こんにちは！</h1>
                         <p className="text-gray-600">
@@ -132,7 +119,7 @@ export const LoginPage: React.FC = () => {
                                 <div className="w-full border-t border-gray-300"></div>
                             </div>
                             <div className="relative flex justify-center text-sm">
-                                <span className="px-4 bg-white text-gray-500">
+                                <span className="px-4 bg-background text-gray-500">
                                     または
                                 </span>
                             </div>

@@ -52,6 +52,17 @@
     }
   }
   --animate-slide-up: slide-up 0.5s ease-out;
+  @keyframes slide-down {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+  }
+  --animate-slide-down: slide-down 0.2s ease-out;
 }
 
 /* 通常時（ライトモード）css */
@@ -108,8 +119,8 @@
   --primary-foreground: #1c1917;
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: #292524;
-  --muted-foreground: #a8a29e;
+  --muted: #44403c;
+  --muted-foreground: #d6d3d1;
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.396 0.141 25.723);

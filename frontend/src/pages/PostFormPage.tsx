@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { PostInsert } from '../types/Post';
 import { useNavigate } from 'react-router-dom';
+import { Layout } from '../components/layouts/Layout';
 
 // ログ投稿ページ
 export const PostFormPage: React.FC = () => {
@@ -58,7 +59,7 @@ export const PostFormPage: React.FC = () => {
             const newPost: PostInsert = {
                 user_id: userId,
                 image_url: imageUrl,
-                comment: comment || null,
+                comment: comment,
                 rating: rating,
             };
             console.log('userId2' + userId);
@@ -83,63 +84,65 @@ export const PostFormPage: React.FC = () => {
     };
 
     return (
-        <div className="p-8 max-w-xl mx-auto">
-            <h1 className="text-3xl font-bold mb-6">新しい料理ログの投稿</h1>
+        <Layout>
+            <div className="p-8 max-w-xl mx-auto">
+                <h1 className="text-3xl font-bold mb-6">新しい料理ログの投稿</h1>
 
-            {/* エラー表示 */}
-            {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
+                {/* エラー表示 */}
+                {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-                {/* 画像選択フィールド */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">写真（必須）</label>
-                    <input
-                        id="image-file"
-                        type="file"
-                        accept="image/*"
-                        required
-                        onChange={(e) => setImageFile(e.target.files ? e.target.files[0] : null)}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
-                    />
-                </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* 画像選択フィールド */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">写真（必須）</label>
+                        <input
+                            id="image-file"
+                            type="file"
+                            accept="image/*"
+                            required
+                            onChange={(e) => setImageFile(e.target.files ? e.target.files[0] : null)}
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
+                        />
+                    </div>
 
-                {/* コメントフィールド */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">コメント</label>
-                    <textarea
-                        id="comment"
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                        rows={4}
-                    />
-                </div>
+                    {/* コメントフィールド */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">コメント</label>
+                        <textarea
+                            id="comment"
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                            rows={4}
+                        />
+                    </div>
 
-                {/* 評価フィールド */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">満足度</label>
-                    <input
-                        id="rating"
-                        type="number"
-                        min="1"
-                        max="5"
-                        value={rating ?? ''}
-                        onChange={(e) => setRating(parseInt(e.target.value) || null)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                    />
-                </div>
+                    {/* 評価フィールド */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">満足度</label>
+                        <input
+                            id="rating"
+                            type="number"
+                            min="1"
+                            max="5"
+                            value={rating ?? ''}
+                            onChange={(e) => setRating(parseInt(e.target.value) || null)}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                        />
+                    </div>
 
-                {/* 投稿ボタン */}
-                <button
-                    type="submit"
-                    disabled={isSubmitting || !imageFile}
-                    className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-                        isSubmitting ? 'bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-700'
-                    }`}
-                >
-                    {isSubmitting ? '投稿中、、、' : '記録を投稿'}
-                </button>
-            </form>
-        </div>
+                    {/* 投稿ボタン */}
+                    <button
+                        type="submit"
+                        disabled={isSubmitting || !imageFile}
+                        className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                            isSubmitting ? 'bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-700'
+                        }`}
+                    >
+                        {isSubmitting ? '投稿中、、、' : '記録を投稿'}
+                    </button>
+                </form>
+            </div>
+        </Layout>
     );
 };
