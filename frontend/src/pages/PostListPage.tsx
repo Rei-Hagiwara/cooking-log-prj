@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { Post } from '../types/Post';
-import { useNavigate } from 'react-router-dom';
+import { RecipeCard } from '../components/ui/RecipeCard';
+import { Layout } from '../components/layouts/Layout';
 
 export const PostListPage: React.FC = () => {
     const navigate = useNavigate();
@@ -46,27 +48,13 @@ export const PostListPage: React.FC = () => {
     }, []);
 
     return (
+        <Layout >
         <div className="p-4 sm:p-8 max-w-4xl mx-auto">
             {/* ログ一覧 */}
             <header className="flex justify-between items-center mb-6 border-b pb-4">
-                <h1 className="text-3xl font-bold text-gray-800">
+                <h2 className="text-3xl font-bold text-gray-800">
                     あなたの料理ログ ({posts.length}件)
-                </h1>
-                <div className="space-x-4">
-                    <button
-                        onClick={() => navigate('/new')}
-                        className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-200"
-                    >
-                        新規投稿
-                    </button>
-                    {/* ログアウトボタン */}
-                    <button
-                        onClick={handleLogout}
-                        className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-200"
-                    >
-                        ログアウト
-                    </button>
-                </div>
+                </h2>
             </header>
 
             {/* エラー表示 */}
@@ -78,29 +66,13 @@ export const PostListPage: React.FC = () => {
             {/* 投稿データの一覧表示 */}
             <div className="space-y-6">
                 {posts.map((post) => (
-                    <div key={post.id} className="bg-white shadow-lg rounded-lg overflow-hidden flex border">
-                        {/* 画像表示 */}
-                        {post.image_url && (
-                            <div className="w-1/3 shrink-0">
-                                <img
-                                    src={post.image_url}
-                                    alt="料理の写真"
-                                    className="w-full h-48 object-cover"
-                                />
-                            </div>
-                        )}
-
-                        {/* ログ詳細 */}
-                        <div className={`p-4 ${post.image_url ? 'w-2/3' : 'w-full'}`}>
-                            <p className="text-sm text-gray-500 mb-2">
-                                投稿日：{new Date(post.created_at || '').toLocaleDateString('ja-JP')}
-                            </p>
-                            <p className="text-gray-800 mb-4">{post.comment}</p>
-                            <div className="flex space-x-4 text-sm font-medium">
-                                <span className="text-indigo-600">満足度：{post.rating}</span>
-                            </div>
-                        </div>
-                    </div>
+                    <RecipeCard
+                        key={post.id}
+                        title={post.title}
+                        imageUrl={post.image_url}
+                        rating={post.rating}
+                        date={new Date(post.created_at || '').toLocaleDateString('ja-JP')}
+                    />
                 ))}
 
                 {/* 投稿が無い場合 */}
@@ -110,6 +82,27 @@ export const PostListPage: React.FC = () => {
                     </div>
                 )}
             </div>
+
+            {/* 新規投稿ボタン（モバイル用） */}
+            <button 
+                onClick={() => navigate('/new')}
+                className="
+                    lg:hidden fixed bottom-6 right-6
+                    w-14 h-14
+                    bg-primary text-white
+                    rounded-full 
+                    shadow-xl shadow-black/40 dark:shadow-[0_0_20px_rgba(0,0,0,0.6)]
+                    flex items-center justify-center
+                    text-3xl
+                    hover:scale-110 transition-transform
+                    active:scale-95 active:shadow-md
+                    cursor-pointer
+                    z-40
+                "
+            >
+                ＋
+            </button>
         </div>
+        </Layout>
     );
 };
