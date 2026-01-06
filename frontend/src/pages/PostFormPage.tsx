@@ -1,147 +1,183 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import type { PostInsert } from '../types/Post';
 import { useNavigate } from 'react-router-dom';
+// import type { PostInsert } from '../types/Post';
 import { Layout } from '../components/layouts/Layout';
+import { StepPhase } from '../components/post-form/StepPhase';
+import { FinalPhase } from '../components/post-form/FinalPhase';
+import { ReviewPhase } from '../components/post-form/ReviewPhase';
+import type { CookingStep, FinalResult } from '../types/post-form';
 
 // ログ投稿ページ
 export const PostFormPage: React.FC = () => {
     const navigate = useNavigate();
-    const [imageFile, setImageFile] = useState<File | null>(null);
-    const [comment, setComment] = useState('');
-    const [rating, setRating] = useState<number | null>(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    // --- State ---
+    const [phase, setPhase] = useState<'steps' | 'final' | 'review'>('steps');  // 投稿フェーズ
+    const [isSubmitting, setIsSubmitting] = useState(false);                    // 送信中フラグ
+    const [steps, setSteps] = useState<CookingStep[]>([                         // 各調理手順
+        { id: 1, image: null, previewUrl: null, description: '' }
+    ]);
+    const [currentStepIndex, setCurrentStepIndex] = useState(0);                // 現在の調理手順番号
+    const [finalData, setFinalData] = useState<FinalResult>({                   // 完成品
+        image: null, previewUrl: null, rating: 3, comment: ''
+    });
 
-    // フォーム送信時の処理
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (isSubmitting || !imageFile) return;
+    // --- ハンドラー ---
+    // 1. 画像処理
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>, isFinal: boolean) => {
+        if (!e.target.files?.[0]) return;
+        const file = e.target.files[0];
+        const url  = URL.createObjectURL(file);
 
+        if (isFinal) {
+            setFinalData(prev => ({ ...prev, image: file, previewUrl: url }));
+        } else {
+            setSteps(prev => {
+                const newSteps = [...prev];
+                newSteps[currentStepIndex] = { ...newSteps[currentStepIndex], image: file, previewUrl: url };
+                return newSteps;
+            });
+        }
+    };
+
+    // 2. 手順を進める
+    const nextStep = () => {
+        const nextIndex = currentStepIndex + 1;
+        if (nextIndex >= steps.length) {
+            setSteps([...steps, { id: nextIndex + 1, image: null, previewUrl: null, description: '' }]);
+        }
+        setCurrentStepIndex(nextIndex);
+    };
+
+    // 3. 手順を戻る
+    const prevStep = () => {
+        if (currentStepIndex > 0) setCurrentStepIndex(currentStepIndex - 1);
+    };
+
+    // 4. 送信処理
+    const handleSubmit = async () => {
+        if (isSubmitting || !finalData.image) return;
         setIsSubmitting(true);
-        setError(null);
-
-        let imageUrl: string | null = null;
-        let uploadDataPath: string | null = null;
-
         try {
-            // 認証中のユーザーID取得
             const user = await supabase.auth.getUser();
             const userId = user.data.user?.id;
-            if (!userId) throw new Error("ユーザーが認証されていません。");
-            console.log('userId1' + userId);
-            // 1.画像アップロード処理
-            // ファイル名をユニークにする
-            const fileExtention = imageFile.name.split('.').pop();
-            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExtention}`;
-            // パス名（ユーザーID/ファイル名）
-            const filePath = `${userId}/${fileName}`;
+            if (!userId) throw new Error("ユーザー認証エラー");
 
+            // 画像アップロード
+            const fileExt = finalData.image.name.split('.').pop();
+            const fileName = `main-${Date.now()}.${fileExt}`;
             const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('images')
-                .upload(filePath, imageFile, {
-                    cacheControl: '3600',
-                    upsert: false,
-                });
+                .from('images').upload(`${userId}/${fileName}`, finalData.image);
 
-            if (uploadError) throw new Error(`画像アップロードエラー：${uploadError.message}`);
+            if (uploadError) throw uploadError;
 
-            uploadDataPath = uploadData.path;
+            const { data: publicUrl } = supabase.storage.from('images').getPublicUrl(uploadData.path);
 
-            // 公開URLを取得
-            const { data: publicUrlData } = supabase.storage
-                .from('images')
-                .getPublicUrl(uploadData.path);
+            // コメント結合
+            let fullComment = finalData.comment + "\n\n--- 調理ログ ---\n";
+            steps.forEach((step, i) => {
+                if (step.description) fullComment += `[手順${i + 1}] ${step.description}\n`;
+            });
 
-            imageUrl = publicUrlData.publicUrl;
-
-            // 2.ログデータ挿入処理
-            const newPost: PostInsert = {
+            // DB保存
+            const { error: dbError } = await supabase.from('posts').insert([{
                 user_id: userId,
-                image_url: imageUrl,
-                comment: comment,
-                rating: rating,
-            };
-            console.log('userId2' + userId);
-            const { error: dbError } = await supabase
-                .from('posts')
-                .insert([newPost]);
+                image_url: publicUrl.publicUrl,
+                comment: fullComment,
+                rating: finalData.rating,
+            }]);
 
-            if (dbError) throw new Error(`DB挿入エラー：${dbError.message}`);
-
-            alert('投稿が完了しました！');
-            navigate('/');  // 一覧画面へ遷移
-
+            if (dbError) throw dbError;
+            alert ("記録完了!");
+            navigate('/');
         } catch (err: any) {
-            setError(`投稿エラー： ${err.message || '不明なエラー'}`);
-            // エラー時の処理（アップロード済みなら削除など）
-            if (uploadDataPath) {
-                await supabase.storage.from('images').remove([uploadDataPath]);
-            }
+            alert(err.message);
         } finally {
-            setIsSubmitting(false);
+            setIsSubmitting(true);
         }
     };
 
     return (
         <Layout>
-            <div className="p-8 max-w-xl mx-auto">
-                <h1 className="text-3xl font-bold mb-6">新しい料理ログの投稿</h1>
+            <div className="relative z-10 max-w-2xl mx-auto mt-6 lg:mt-12 mb-20">
+                <div className="bg-card border border-border rounded-xl shadow-2xl overflow-hidden transition-all duration-300">
 
-                {/* エラー表示 */}
-                {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* 画像選択フィールド */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">写真（必須）</label>
-                        <input
-                            id="image-file"
-                            type="file"
-                            accept="image/*"
-                            required
-                            onChange={(e) => setImageFile(e.target.files ? e.target.files[0] : null)}
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
-                        />
+                    {/* ヘッダー（進捗） */}
+                    <div className="bg-muted/50 px-6 py-4 border-b border-border flex justify-between items-center">
+                        <span className="font-bold text-primary">
+                            {phase === 'steps' ? `Step ${currentStepIndex + 1}` : phase === 'final' ? '完成!' : '最終確認'}
+                        </span>
+                        <div className="flex gap-1">
+                            {steps.map((_, i) => (
+                                <div key={i} className={`w-2 h-2 rounded-full ${i === currentStepIndex && phase === 'steps' ? 'bg-primary' : 'bg-gray-300'}`} />
+                            ))}
+                            <div className={`w-2 h-2 rounded-full ${phase === 'steps' ? 'bg-primary' : 'bg-gray-300'}`} />
+                        </div>
                     </div>
 
-                    {/* コメントフィールド */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">コメント</label>
-                        <textarea
-                            id="comment"
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                            rows={4}
-                        />
+                    {/* ボディ（コンテンツ切り替え） */}
+                    <div className="p-6 min-h-[400px] flex flex-col">
+                        {phase === 'steps' && (
+                            <StepPhase
+                                stepIndex={currentStepIndex}
+                                stepData={steps[currentStepIndex]}
+                                onImageChange={(e) => handleImageSelect(e, false)}
+                                onTextChange={(text) => {
+                                    const newSteps = [...steps];
+                                    newSteps[currentStepIndex].description = text;
+                                    setSteps(newSteps);
+                                }}
+                            />
+                        )}
+                        {phase === 'final' && (
+                            <FinalPhase
+                                data={finalData}
+                                onImageChange={(e) => handleImageSelect(e, true)}
+                                onUpdate={(updates) => setFinalData({ ...finalData, ...updates })}
+                            />
+                        )}
+                        {phase === 'review' && (
+                            <ReviewPhase
+                                steps={steps}
+                                finalData={finalData}
+                            />
+                        )}
                     </div>
 
-                    {/* 評価フィールド */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">満足度</label>
-                        <input
-                            id="rating"
-                            type="number"
-                            min="1"
-                            max="5"
-                            value={rating ?? ''}
-                            onChange={(e) => setRating(parseInt(e.target.value) || null)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                        />
+                    {/* 3. フッター（ナビゲーションボタン） */}
+                    <div className="bg-muted/50 px-6 py-4 bordet-t border-border flex justify-between">
+                        {/* 戻るボタン */}
+                        {phase === 'steps' && currentStepIndex === 0 ? (
+                            <button onClick={() => navigate('/')} className="text-sm text-muted-foreground hover:text-foreground cursor-pointer">キャンセル</button>
+                        ) : (
+                            <button
+                                onClick={() => {
+                                    if(phase === 'review') setPhase('final');
+                                    else if(phase === 'final') setPhase('steps');
+                                    else prevStep();
+                                }}
+                                className="px-4 py-2 rounded-lg hover:bg-muted text-sm cursor-pointer"
+                            >
+                                戻る
+                            </button>
+                        )}
+
+                        {/* 進むボタン */}
+                        {phase === 'steps' ? (
+                            <div className="flex gap-2">
+                                <button onClick={() => setPhase('final')} className="px-4 py-2 text-sm text-primary font-bold hover:bg-primary/10 cursor-pointer rounded-lg">完成!</button>
+                                <button onClick={nextStep} className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 hover:scale-105 cursor-pointer transition-transform">次へ</button>
+                            </div>
+                        ) : phase === 'final' ? (
+                            <button onClick={() => setPhase('review')} disabled={!finalData.image} className="px-6 py-2 bg-primary text-white rounded-lg shadow-lg hover:bg-primary/90 hover:scale-105 cursor-pointer transition-transform disabled:opacity-50">確認画面へ</button>
+                        ) : (
+                            <button onClick={handleSubmit} disabled={isSubmitting} className="px-8 py-2 bg-primary text-white font-bold rounded-lg shadow-xl hover:bg-primary/90 hover:scale-105 cursor-pointer transition-transform">
+                                {isSubmitting ? '保存中．．．' : 'ログを保存'}
+                            </button>
+                        )}
                     </div>
 
-                    {/* 投稿ボタン */}
-                    <button
-                        type="submit"
-                        disabled={isSubmitting || !imageFile}
-                        className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-                            isSubmitting ? 'bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-700'
-                        }`}
-                    >
-                        {isSubmitting ? '投稿中、、、' : '記録を投稿'}
-                    </button>
-                </form>
+                </div>
             </div>
         </Layout>
     );

@@ -11,15 +11,6 @@ export const PostListPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // ログアウト処理
-    const handleLogout = async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-            console.error('Logout error:', error);
-            alert('ログアウトに失敗しました');
-        }
-    };
-
     useEffect(() => {
         // ログインユーザーの投稿を取得
         const fetchPosts = async () => {
