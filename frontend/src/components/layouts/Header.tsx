@@ -82,7 +82,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
                             handleLogout();
                             setIsUserMenuOpen(false);
                         }}
-                        className="flex w-full items-center px-4 py-2 text-sm text-destructive hover:bg-muted cursor-pointer transition-colors"
+                        className="flex w-full items-center px-4 py-2 text-sm text-destructive-foreground hover:bg-muted cursor-pointer transition-colors"
                     >
                         <span className="mr-2">🚪</span> ログアウト
                     </button>

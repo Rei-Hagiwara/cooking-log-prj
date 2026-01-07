@@ -43,7 +43,7 @@ export const PostListPage: React.FC = () => {
         <div className="p-4 sm:p-8 max-w-4xl mx-auto">
             {/* ログ一覧 */}
             <header className="flex justify-between items-center mb-6 border-b pb-4">
-                <h2 className="text-3xl font-bold text-gray-800">
+                <h2 className="text-3xl font-bold text-foreground">
                     あなたの料理ログ ({posts.length}件)
                 </h2>
             </header>
@@ -55,7 +55,7 @@ export const PostListPage: React.FC = () => {
             {loading && <p className="text-center text-gray-500">ログを読み込み中…</p>}
 
             {/* 投稿データの一覧表示 */}
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {posts.map((post) => (
                     <RecipeCard
                         key={post.id}
@@ -63,6 +63,7 @@ export const PostListPage: React.FC = () => {
                         imageUrl={post.image_url}
                         rating={post.rating}
                         date={new Date(post.created_at || '').toLocaleDateString('ja-JP')}
+                        isLoading={loading}
                     />
                 ))}
 

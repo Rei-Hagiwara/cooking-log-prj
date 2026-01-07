@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* ダークモード適用 */
+@variant dark (&:where(.dark, .dark *));
+
 /* tailwindにcssを登録 */
 @theme {
   --color-background: var(--background);  /* bg-backgroundやtext-backgroundで使用する色を指定 */
@@ -39,8 +42,10 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
+}
 
   /* アニメーション */
+  /* スライド（上下） */
   @keyframes slide-up {
     from {
         transform: translateY(100px);
@@ -51,7 +56,9 @@
         opacity: 1;
     }
   }
-  --animate-slide-up: slide-up 0.5s ease-out;
+  .animate-slide-up{
+    animation: slide-up 0.5s ease-out;
+  }
   @keyframes slide-down {
     from {
         transform: translateY(-10px);
@@ -62,8 +69,36 @@
         opacity: 1;
     }
   }
-  --animate-slide-down: slide-down 0.2s ease-out;
-}
+  .animate-slide-down {
+    animation: slide-down 0.2s ease-out;
+  }
+  /* スライド（左右） */
+  @keyframes slide-in-right {
+    from {
+        transform: translateX(20px); 
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0px);
+        opacity: 1;
+    }
+  }
+  .animate-slide-in-right {
+    animation: slide-in-right 0.3s ease-out forwards;
+  }
+  @keyframes slide-in-left {
+    from {
+        transform: translateX(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+  }
+  .animate-slide-in-left {
+    animation: slide-in-left 0.3s ease-out forwards;
+  }
 
 /* 通常時（ライトモード）css */
 :root {
@@ -83,7 +118,7 @@
   --accent: #e9ebef;
   --accent-foreground: #030213;
   --destructive: #d4183d;
-  --destructive-foreground: #ffffff;
+  --destructive-foreground: oklch(0.637 0.237 25.331);
   --border: #e7e5e4;
   --input: transparent;
   --input-background: #f3f3f5;
