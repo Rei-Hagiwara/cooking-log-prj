@@ -69,8 +69,11 @@ export const PostListPage: React.FC = () => {
 
                 {/* 投稿が無い場合 */}
                 {!loading && posts.length === 0 && (
-                    <div className="text-center p-10 bg-gray-50 rounded-lg">
-                        <p className="text-gray-600">まだ料理ログがありません。上のボタンから投稿してみましょう！</p>
+                    <div className="w-full aspect-4/3 bg-card rounded-lg flex items-center justify-center text-center">
+                        <p className="p-8 text-foreground">
+                            <span className="block">まだ料理ログがありません。</span>
+                            <span className="block">投稿してみましょう！</span>
+                        </p>
                     </div>
                 )}
             </div>

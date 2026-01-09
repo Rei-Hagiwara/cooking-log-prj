@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@plugin "tailwindcss-animate";
 
 /* ダークモード適用 */
 @variant dark (&:where(.dark, .dark *));
