@@ -36,7 +36,7 @@ export const SidebarContent = ({ onItemClick }: SidebarProps) => {
                                     className={`
                                         flex items-center gap-3 p-3 rounded-lg transition-colors cursor-pointer
                                         ${isActive
-                                            ? "bg-primary text-white shadow-sm"
+                                            ? "bg-primary/80 dark:bg-primary/30 text-white shadow-sm"
                                             : "hover:bg-muted text-foreground"}
                                         `}
                                     >

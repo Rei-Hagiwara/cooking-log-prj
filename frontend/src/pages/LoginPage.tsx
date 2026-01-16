@@ -13,42 +13,42 @@ export const LoginPage: React.FC = () => {
     // ロード中は何もしない
     if (sessionLoading) {
         return (
- <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100 dark:from-stone-700 dark:to-zinc-900">
-        {/* 標準の transition と opacity を使い、React のマウント時にふわっとさせる */}
-        <div className="flex flex-col items-center space-y-4 transition-opacity duration-700 ease-in-out">
-          <div className="relative">
-            {/* メインアイコン */}
-            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg relative z-10">
-              <svg
-                className="w-8 h-8 text-primary-foreground"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100 dark:from-stone-700 dark:to-zinc-900">
+            {/* 標準の transition と opacity を使い、React のマウント時にふわっとさせる */}
+            <div className="flex flex-col items-center space-y-4 transition-opacity duration-700 ease-in-out">
+                <div className="relative">
+                    {/* メインアイコン */}
+                    <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg relative z-10">
+                    <svg
+                        className="w-8 h-8 text-primary-foreground"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                        />
+                    </svg>
+                    </div>
+                    
+                    {/* スピナー：標準の animate-spin を使用 */}
+                    <div className="absolute -inset-2 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                </div>
+                
+                <div className="text-center space-y-1">
+                    <p className="text-lg text-gray-500 font-medium text-foreground tracking-wider">
+                    Cooking Log
+                    </p>
+                    {/* テキスト明滅：標準の animate-pulse を使用 */}
+                    <p className="text-sm text-muted-foreground animate-pulse">
+                    認証状態を確認中...
+                    </p>
+                </div>
             </div>
-            
-            {/* スピナー：標準の animate-spin を使用 */}
-            <div className="absolute -inset-2 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-          </div>
-          
-          <div className="text-center space-y-1">
-            <p className="text-lg text-gray-500 font-medium text-foreground tracking-wider">
-              Cooking Log
-            </p>
-            {/* テキスト明滅：標準の animate-pulse を使用 */}
-            <p className="text-sm text-muted-foreground animate-pulse">
-              認証状態を確認中...
-            </p>
-          </div>
         </div>
-      </div>
         );
     }
 
