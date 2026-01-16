@@ -71,3 +71,12 @@ vite.config.js :
 
 index.css :
 @import 'tailwindcss';
+
+
+
+ーVervelデプロイ
+・開始方法
+　1. vercel.com(https://vercel.com/)にアクセスしてGitリポジトリを入力
+　2. Git Scopeでinstallを行ってvercelとGitを接続　その後Create
+　3. Root directoryでfrontendを設定
+　4. Environment VariablesでSUPABASE_URLとKEYを設定
