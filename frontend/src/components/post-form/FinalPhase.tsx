@@ -1,5 +1,7 @@
 import React from 'react';
 import type { DishFormData } from '../../types/post-form';
+import { TagCombobox } from './TagCombobox';
+import type { TagWithCategory } from './TagCombobox';
 
 type Props = {
     data: DishFormData;
@@ -46,6 +48,27 @@ export const FinalPhase = ({ data, onImageChange, onUpdate, commentError, nameEr
                 {/* バリデーションエラー */}
                 {nameError && (
                     <p className="text-xs text-red-500 mt-1 font-bold">{nameError}</p>
+                )}
+            </div>
+
+            {/* タグ選択 */}
+            <div className="z-20">
+                <label className="block text-xs font-bold text-muted-foreground mb-1">
+                    料理の種類
+                </label>
+                <TagCombobox
+                    selectedTag={data.selectedTag}
+                    onSelect={(tag) => {
+                        onUpdate({
+                            selectedTag: tag,
+                            tag_id: tag?.id || null
+                        });
+                    }}
+                />
+                {data.selectedTag?.category && (
+                    <p className="text-xs text-primary mt-1 text-right">
+                        カテゴリー：{data.selectedTag.category.name}
+                    </p>
                 )}
             </div>
 

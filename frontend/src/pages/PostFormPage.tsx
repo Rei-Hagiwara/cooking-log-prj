@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { validateText, validateImage } from '../utils/validators';
@@ -32,6 +32,7 @@ export const PostFormPage: React.FC = () => {
             tempId: crypto.randomUUID(),    // フロント管理用一意ID
             name: '', 
             tag_id: null, 
+            selectedTag: null,
             steps: [{ image: null, previewUrl: null, description: '' }], 
             isSkipped: false,
             image: null, 
@@ -132,30 +133,46 @@ export const PostFormPage: React.FC = () => {
     // 1．料理をリストに追加（または更新）して、次へ
     const handleConfirmDish = (action: 'add_another' | 'finish') => {
         if (!currentDish.name) {
-            alert("料理名を入力してください"); // ←他と同じようにバリデーションにしたい
+            alert("料理名を入力してください");
             return;
         }
 
-        setDishList(prev => {
-            const index = prev.findIndex(d => d.tempId === currentDish.tempId);
-            if (index !== -1) {
-                // 編集の場合：更新
-                const newList = [...prev];
-                newList[index] = currentDish;
-                return newList;
-            } else {
-                // 新規の場合：追加
-                return [...prev, currentDish];
-            }
-        });
+        // 判定用に変数で次の状態を計算
+        let nextDishList = [...dishList];
+        const index = nextDishList.findIndex(d => d.tempId === currentDish.tempId);
+
+        if (index !== -1) {
+            // 編集の場合：更新
+            nextDishList[index] = currentDish;
+        } else {
+            // 新規の場合：追加
+            nextDishList = [...nextDishList, currentDish];
+        }
+
+        // State更新
+        setDishList(nextDishList);
 
         if (action === 'add_another') {
             // 新しい調理手順をセット
             setCurrentDish(createEmptyDish());
             setCurrentStepIndex(0);
+            // 調理手順へ
             setWizzardPhase('steps');
         } else {
-            // 全体入力へ
+            // 料理が一つだけの場合は、料理名と完成写真を投稿まとめの初期値としてコピー
+            if (nextDishList.length === 1) {
+                setOverallData(prev => ({
+                    ...prev,
+                    title: nextDishList[0].name,
+                    image: nextDishList[0].image,
+                    previewUrl: nextDishList[0].previewUrl,
+                    is_public: false,
+                    titleError: null,
+                    imageError: null,
+
+                }))
+            }
+            // まとめ入力へ
             setGlobalPhase('overall_edit');
         }
     };
@@ -284,10 +301,25 @@ export const PostFormPage: React.FC = () => {
     const hasConfirmed  = existingIndex !== -1 ? true : false;                      // 確定済みか新規か
     const dishNumber    = hasConfirmed ? existingIndex + 1 : dishList.length + 1;   // 料理の番号
 
+    // --- 表示用：スクロールの基準点 ---
+    const formTopRef    = useRef<HTMLDivElement>(null);
+
+    // フォーム切り替え時にトップへスクロール
+    useEffect(() => {
+        if (formTopRef.current) {
+            formTopRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    }, [globalPhase, wizzardPhase, currentStepIndex]);
+
     return (
         <Layout>
             <div className="z-10 max-w-2xl mx-auto mt-6 lg:mt-12 mb-10 px-4">
-                        
+
+                {/* スクロール用ref */}
+                <div ref={formTopRef} className="scroll-mt-20">
                 {isSuccess ? (
                     /* 投稿完了時UI */
                     <div
@@ -574,7 +606,7 @@ export const PostFormPage: React.FC = () => {
                                         <label className="block text-sm font-bold mb-2">全体写真</label>
                                         <label className={`
                                             w-full h-48 border-2 border-dashed rounded-lg 
-                                            flex items-center justify-center cursor-pointer hover:bg-muted/50 bg-muted/20 relative overflow-hidden
+                                            flex items-center justify-center cursor-pointer hover:bg-muted/50 bg-muted/20 relative overflow-hidden transition-colors
                                             ${overallData.imageError
                                                 ? 'border-red-500'
                                                 : 'border-border'
@@ -614,6 +646,7 @@ export const PostFormPage: React.FC = () => {
                         )}
                     </>
                 )}
+                </div>
             </div>
         </Layout>
     );

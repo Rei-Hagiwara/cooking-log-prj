@@ -1,3 +1,5 @@
+import type { TagWithCategory } from '../components/post-form/TagCombobox';
+
 /**
  * 調理手順のデータ
  * @param image         入力写真
@@ -19,6 +21,7 @@ export type CookingStep = {
  * @param tempId        フロント管理用ID
  * @param name          料理名
  * @param tag_id        料理タグ
+ * @param selectedTag   UI表示用選択タグオブジェクト
  * @param steps         調理手順（配列）
  * @param isSkipped     スキップフラグ
  * @param image         完成写真
@@ -33,6 +36,7 @@ export type DishFormData = {
     tempId: string;
     name: string;
     tag_id: string | null;
+    selectedTag: TagWithCategory | null,
     steps: CookingStep[];
     isSkipped: boolean;
 

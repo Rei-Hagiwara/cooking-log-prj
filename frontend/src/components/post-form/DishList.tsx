@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
+import { Transition } from '@headlessui/react';
 import type { DishFormData } from '../../types/post-form';
 
 type Props = {
@@ -31,7 +32,7 @@ export const DishListItem = ({ dish, index, onEdit, onDelete }: Props) => {
 
             {/* --- メイン情報エリア（完成品） --- */}
             <div 
-                className="p-4 flex gap-4 cursor-pointer relative"
+                className="p-4 flex gap-4 cursor-pointer md:cursor-default relative"
                 onClick={handleCardClick}
             >
                 {/* 左：完成写真 */}
@@ -52,13 +53,13 @@ export const DishListItem = ({ dish, index, onEdit, onDelete }: Props) => {
                             <div className="hidden md:flex gap-2">
                                 <button
                                     onClick={(e) => { e.stopPropagation(); onEdit() }}
-                                    className="text-xs px-2 py-1 bg-background border rounded hover:bg-muted transition-colors"
+                                    className="text-xs px-2 py-1 bg-background border rounded hover:bg-muted transition-colors cursor-pointer"
                                 >
                                     編集
                                 </button>
                                 <button
                                     onClick={() => { onDelete(); setIsMenuOpen(false); }}
-                                    className="text-xs px-2 py-1 text-red-500 hover:bg-red-50 transition-colors"
+                                    className="text-xs px-2 py-1 text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
                                 >
                                     削除
                                 </button>
@@ -81,7 +82,7 @@ export const DishListItem = ({ dish, index, onEdit, onDelete }: Props) => {
                                 e.stopPropagation();    // モバイル用メニュー表示を阻止
                                 setIsMenuOpen(!isMenuOpen);
                             }}
-                            className="p-1 hover:bg-muted rounded-full transition-colors"
+                            className="p-1 hover:bg-muted rounded-full transition-colors cursor-pointer"
                         >
                             {/* アイコン */}
                             <svg 
@@ -95,9 +96,18 @@ export const DishListItem = ({ dish, index, onEdit, onDelete }: Props) => {
                 </div>
 
                 {/* モバイル用オーバーレイメニュー */}
-                {showMobileMenu && (
+                <Transition
+                    as={Fragment}
+                    show={showMobileMenu}
+                    enter="transition ease-out duration-200"
+                    enterFrom="opacity-0"        // scaleは無くても自然です
+                    enterTo="opacity-100"
+                    leave="transition ease-in duration-150"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                >
                     <div 
-                        className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-10 flex items-center justify-center gap-6 animate-in fade-in duration-200 md:hidden"
+                        className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-10 flex items-center justify-center gap-6 md:hidden"
                         onClick={(e) => {
                             e.stopPropagation();
                             setShowMobileMenu(false);
@@ -116,12 +126,22 @@ export const DishListItem = ({ dish, index, onEdit, onDelete }: Props) => {
                             削除
                         </button>
                     </div>
-                )}
+                </Transition>
             </div>
 
             {/* --- 手順エリア --- */}
-            {isMenuOpen && (
-                <div className="border-t border-border bg-muted/30 p-4 animate-in slide-in-from-top-2 duration-300">
+            <Transition
+                as={Fragment}
+                show={isMenuOpen}
+                enter="transition-all ease-out duration-300"
+                enterFrom="opacity-0 -translate-y-2 max-h-0"
+                enterTo="opacity-100 translate-y-0 max-h-[1000px]"
+                leave="transition-all ease-in duration-200"
+                leaveFrom="opacity-100 translate-y-0 max-h-[1000px]"
+                leaveTo="opacity-0 -translate-y-2 max-h-0"
+                >
+                <div className="border-t border-border bg-muted/30 p-4 overflow-hidden">
+                    {/* モバイル：縦、他：横表示 */}
                     <div className="flex gap-4 flex-col md:flex-row md:overflow-x-auto md:pb-2 md:snap-x">
                         {dish.isSkipped ? (
                             <div className="text-center w-full py-4 text-muted-foreground">
@@ -163,7 +183,7 @@ export const DishListItem = ({ dish, index, onEdit, onDelete }: Props) => {
                         ))}
                     </div>
                 </div>
-            )}
+            </Transition>
         </div>
     );
 };
